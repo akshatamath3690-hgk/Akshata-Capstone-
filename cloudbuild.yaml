@@ -15,6 +15,22 @@ steps:
     - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO_NAME}/${_SERVICE_NAME}:${SHORT_SHA}'
   id: Push
 
+# Step 2a: Tag the image with :latest
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - 'tag'
+    - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO_NAME}/${_SERVICE_NAME}:${SHORT_SHA}'
+    - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO_NAME}/${_SERVICE_NAME}:latest'
+  id: TagLatest
+
+# Step 2b: Push the :latest tagged image to Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - 'push'
+    - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO_NAME}/${_SERVICE_NAME}:latest'
+  id: PushLatest
+
+
 # Step 3: Deploy the image to Cloud Run
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   args:
@@ -33,6 +49,7 @@ steps:
 
 images:
   - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO_NAME}/${_SERVICE_NAME}:${SHORT_SHA}'
+  - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO_NAME}/${_SERVICE_NAME}:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY
